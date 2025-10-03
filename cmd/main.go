@@ -2,6 +2,8 @@ package main
 
 import (
 	"amr-data-bridge/config"
+	"amr-data-bridge/internal/api"
+	"amr-data-bridge/internal/db"
 	"context"
 	"log"
 	"os"
@@ -16,8 +18,13 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	pool, err := db.NewPGPool(ctx, &cfg.DB)
+	if err != nil {
+		log.Fatalf("Unable to connect to DB: %v", err)
+	}
+
 	// Start HTTP server
-	if err := http.StartServer(ctx, cfg); err != nil {
+	if err := api.StartServer(ctx, &cfg.SERVER); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }
