@@ -9,6 +9,7 @@ import (
 
 type DBConfig struct {
 	HOST     string
+	PORT     string
 	DB       string
 	USER     string
 	PASSWORD string
@@ -38,6 +39,7 @@ func Load() *AppConfig {
 	// Database configuration
 	db := DBConfig{
 		HOST:     os.Getenv("POSTGRES_HOST"),
+		PORT:     os.Getenv("POSTGRES_PORT"),
 		DB:       os.Getenv("POSTGRES_DB"),
 		USER:     os.Getenv("POSTGRES_USER"),
 		PASSWORD: os.Getenv("POSTGRES_PASSWORD"),
