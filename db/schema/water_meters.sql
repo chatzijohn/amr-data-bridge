@@ -1,0 +1,23 @@
+CREATE TABLE public."waterMeters" (
+    id SERIAL PRIMARY KEY,
+    "devEUI" VARCHAR(255) NOT NULL,
+    "serialNumber" VARCHAR(255) NOT NULL,
+    "brandName" VARCHAR(255) NOT NULL,
+    "ltPerPulse" INT NOT NULL,
+    "currentReading" INT,
+    "isActive" BOOLEAN NOT NULL,
+    "alarmStatus" BOOLEAN NOT NULL,
+    "noFlow" BOOLEAN NOT NULL,
+    "deviceHandshake" INT,
+    "deviceLogging" INT,
+    "serverHandshake" INT,
+    "serverLogging" INT,
+    "inactivityTimeout" INT NOT NULL,
+    "lastSeen" TIMESTAMP,
+    rssi INT,
+    snr DOUBLE PRECISION,
+    "spreadingFactor" INT,
+    "gatewayId" VARCHAR(255),
+    "createdAt" TIMESTAMP NOT NULL,
+    "updatedAt" TIMESTAMP NOT NULL
+);

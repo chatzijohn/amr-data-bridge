@@ -1,0 +1,45 @@
+# devenv and nix
+.direnv
+.devenv
+.envrc
+devenv.*
+*.flake.*
+*.nix
+devenv.yaml
+devenv.local.nix
+
+# pre-commit
+.pre-commit-config.yaml
+
+# environment
+.env
+
+# temporary directories
+tmp
+
+# SQLite files
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+sqlite-*
+**/*.sqlite
+**/sqlite-*
+
+# js stuff
+node_modules
+
+# Ignore all _templ.go files in the web/components directory
+web/components/*_templ.go
+web/components/**/*_templ.go
+
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
