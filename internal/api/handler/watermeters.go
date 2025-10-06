@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"amr-data-bridge/internal/api/middleware"
 	"amr-data-bridge/internal/db"
 	"encoding/json"
 	"net/http"
@@ -14,15 +15,18 @@ func NewWaterMeterHandler(q *db.Queries) *WaterMeterHandler {
 	return &WaterMeterHandler{q: q}
 }
 
-func (h *WaterMeterHandler) GetActiveWaterMeters(w http.ResponseWriter, r *http.Request) {
+func (h *WaterMeterHandler) GetActiveWaterMeters(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	meters, err := h.q.GetActiveWaterMeters(ctx)
 	if err != nil {
-		http.Error(w, "failed to fetch water meters", http.StatusInternalServerError)
-		return
+		return middleware.NewHttpError(http.StatusInternalServerError, "failed to fetch water meters")
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(meters)
+	if err := json.NewEncoder(w).Encode(meters); err != nil {
+		return middleware.NewHttpError(http.StatusInternalServerError, "failed to encode response")
+	}
+
+	return nil
 }
