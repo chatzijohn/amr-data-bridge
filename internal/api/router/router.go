@@ -2,10 +2,11 @@ package router
 
 import (
 	"amr-data-bridge/internal/api/handler"
+	"amr-data-bridge/internal/db"
 	"net/http"
 )
 
-func SetupRouter() http.Handler {
+func SetupRouter(queries *db.Queries) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/health", handler.HealthCheck)

@@ -23,8 +23,11 @@ func main() {
 		log.Fatalf("Unable to connect to DB: %v", err)
 	}
 
+	// sqlc Queries instance
+	queries := db.New(pool)
+
 	// Start HTTP server
-	if err := api.StartServer(ctx, &cfg.SERVER); err != nil {
+	if err := api.StartServer(ctx, &cfg.SERVER, queries); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }
