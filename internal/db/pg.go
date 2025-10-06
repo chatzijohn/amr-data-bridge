@@ -23,7 +23,7 @@ func NewPGPool(ctx context.Context, cfg *config.DBConfig) (*pgxpool.Pool, error)
 
 	// Test connection with Ping
 	if err := pool.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("failed to connect to DB: %w", err)
+		return nil, err
 	}
 	return pool, nil
 }
