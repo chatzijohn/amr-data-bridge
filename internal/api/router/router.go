@@ -7,11 +7,16 @@ import (
 	"net/http"
 )
 
-func SetupRouter(queries *db.Queries) http.Handler {
+func SetupRouter(queries *db.Queries, metricsHandler http.Handler) http.Handler {
 	mux := http.NewServeMux()
 
 	h := handler.New(queries)
 	mux.HandleFunc("/health", handler.HealthCheck)
+
+	if metricsHandler != nil {
+		// Add Prometheus /metrics
+		mux.Handle("/metrics", metricsHandler)
+	}
 
 	v1.RegisterWatermeterRoutes(mux, h)
 	return mux

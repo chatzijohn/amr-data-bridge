@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -23,6 +24,7 @@ type ServerConfig struct {
 type AppConfig struct {
 	DB          DBConfig
 	ENVIRONMENT string
+	TELEMETRY   bool
 	SERVER      ServerConfig
 }
 
@@ -35,6 +37,7 @@ func Load() *AppConfig {
 
 	// Application configuration
 	environment := os.Getenv("ENVIRONMENT")
+	telemetry := strings.ToLower(os.Getenv("TELEMETRY")) == "true"
 
 	// Database configuration
 	db := DBConfig{
@@ -51,7 +54,7 @@ func Load() *AppConfig {
 		PORT: getEnvWithDefault("PORT", "8080"),
 	}
 
-	return &AppConfig{ENVIRONMENT: environment, DB: db, SERVER: server}
+	return &AppConfig{ENVIRONMENT: environment, TELEMETRY: telemetry, DB: db, SERVER: server}
 
 }
 
