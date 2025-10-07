@@ -14,7 +14,7 @@ A minimal, performant Go service that ingests external data, transforms it, and 
 
 Future roadmap includes:
 
-- Observability (metrics, tracing)
+- Observability (tracing)
 - Input validation and rate limiting
 - Contract tests and schema versioning
 - Graceful shutdown and retries
@@ -23,13 +23,14 @@ Future roadmap includes:
 
 ## 🧩 Core Components
 
-| Layer       | Description                                        |
-| ----------- | -------------------------------------------------- |
-| `cmd/`      | Entry point + service bootstrap logic              |
-| `internal/` | Domain logic, HTTP handlers, middleware, DB        |
-| `config/`   | Environment-based config loading & validation      |
-| `db/`       | SQL queries generated via [sqlc](https://sqlc.dev) |
-| `scripts/`  | Setup, seed, migration scripts (optional)          |
+| Layer                    | Description                                        |
+| ------------------------ | -------------------------------------------------- |
+| `cmd/`                   | Entry point + service bootstrap logic              |
+| `internal/`              | Domain logic, HTTP handlers, middleware, DB        |
+| `config/`                | Environment-based config loading & validation      |
+| `db/`                    | SQL queries generated via [sqlc](https://sqlc.dev) |
+| `scripts/`               | Setup, seed, migration scripts (optional)          |
+| `observability/metrics/` | Prometheus metrics handler                         |
 
 ---
 
