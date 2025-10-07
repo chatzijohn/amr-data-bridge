@@ -1,3 +1,8 @@
+// @title AMR Data Bridge API
+// @version 1.0
+// @description Minimal Go API with clean architecture
+// @BasePath /api
+
 package main
 
 import (
@@ -22,6 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to connect to DB: %v", err)
 	}
+	defer pool.Close()
 
 	// sqlc Queries instance
 	queries := db.New(pool)
