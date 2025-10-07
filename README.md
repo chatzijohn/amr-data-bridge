@@ -4,7 +4,7 @@ A minimal, performant Go service that ingests external data, transforms it, and 
 
 ---
 
-## 🚀 Project Goals
+## 🎯 Project Goals
 
 - ✅ Clean, idiomatic Go architecture (no frameworks)
 - ✅ Minimal dependencies — stdlib where possible
@@ -58,7 +58,7 @@ go run ./cmd/server
 
 ## 📦 Dependencies
 
-- Go 1.20+
+- Go 1.25.1+
 
 - sqlc
   for SQL generation
