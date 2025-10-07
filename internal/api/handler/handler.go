@@ -16,8 +16,13 @@ func New(q *db.Queries) *Handlers {
 	}
 }
 
-// HealthCheck is a simple liveness probe
+// @Summary Health check
+// @Description Returns OK if the service is running
+// @Tags health
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /healthz [get]
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	w.Write([]byte(`{"status":"ok"}`))
 }

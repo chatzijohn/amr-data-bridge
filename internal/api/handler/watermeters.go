@@ -15,6 +15,14 @@ func NewWaterMeterHandler(q *db.Queries) *WaterMeterHandler {
 	return &WaterMeterHandler{q: q}
 }
 
+// GetActiveWaterMeters godoc
+// @Summary      Get active water meters
+// @Description  Returns a list of all active water meters from the database.
+// @Tags         water-meters
+// @Produce      json
+// @Success      200  {array}  db.WaterMeter
+// @Failure      500  {object}  middleware.HttpError
+// @Router       /water-meters/active [get]
 func (h *WaterMeterHandler) GetActiveWaterMeters(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 

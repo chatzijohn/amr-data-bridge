@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterWatermeterRoutes(mux *http.ServeMux, h *handler.Handlers) {
-	mux.HandleFunc("/api/v1/watermeters", middleware.HandleErrors(
+	mux.HandleFunc("/api/v1/watermeters/active", middleware.HandleErrors(
 		middleware.OnlyAllow(http.MethodGet, h.WaterMeter.GetActiveWaterMeters),
 	))
 
