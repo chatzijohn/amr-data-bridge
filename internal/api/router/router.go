@@ -4,13 +4,16 @@ import (
 	"amr-data-bridge/internal/api/handler"
 	v1 "amr-data-bridge/internal/api/router/v1"
 	"amr-data-bridge/internal/db"
+	"amr-data-bridge/internal/service"
 	"net/http"
 )
 
-func SetupRouter(queries *db.Queries, metricsHandler http.Handler) http.Handler {
+func New(queries *db.Queries, metricsHandler http.Handler) http.Handler {
 	mux := http.NewServeMux()
 
-	h := handler.New(queries)
+	svcs := service.New(queries)
+	h := handler.New(svcs)
+
 	mux.HandleFunc("/health", handler.HealthCheck)
 
 	if metricsHandler != nil {

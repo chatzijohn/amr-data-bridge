@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"amr-data-bridge/internal/db"
+	"amr-data-bridge/internal/service"
 	"net/http"
 )
 
@@ -10,9 +10,9 @@ type Handlers struct {
 }
 
 // New initializes the main handler struct
-func New(q *db.Queries) *Handlers {
+func New(svc *service.Services) *Handlers {
 	return &Handlers{
-		WaterMeter: NewWaterMeterHandler(q),
+		WaterMeter: NewWaterMeterHandler(svc.WaterMeter),
 	}
 }
 
@@ -23,6 +23,8 @@ func New(q *db.Queries) *Handlers {
 // @Success 200 {object} map[string]string
 // @Router /healthz [get]
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	ctx := r.Context()
+	_ = ctx // placeholder, useful if you add checks later
+
 	w.Write([]byte(`{"status":"ok"}`))
 }

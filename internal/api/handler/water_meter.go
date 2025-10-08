@@ -2,17 +2,17 @@ package handler
 
 import (
 	"amr-data-bridge/internal/api/middleware"
-	"amr-data-bridge/internal/db"
+	"amr-data-bridge/internal/service"
 	"encoding/json"
 	"net/http"
 )
 
 type WaterMeterHandler struct {
-	q *db.Queries
+	svc *service.WaterMeterService
 }
 
-func NewWaterMeterHandler(q *db.Queries) *WaterMeterHandler {
-	return &WaterMeterHandler{q: q}
+func NewWaterMeterHandler(svc *service.WaterMeterService) *WaterMeterHandler {
+	return &WaterMeterHandler{svc: svc}
 }
 
 // GetActiveWaterMeters godoc
@@ -26,7 +26,7 @@ func NewWaterMeterHandler(q *db.Queries) *WaterMeterHandler {
 func (h *WaterMeterHandler) GetActiveWaterMeters(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
-	meters, err := h.q.GetActiveWaterMeters(ctx)
+	meters, err := h.svc.GetActiveWaterMeters(ctx)
 	if err != nil {
 		return middleware.NewHttpError(http.StatusInternalServerError, "failed to fetch water meters")
 	}

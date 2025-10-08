@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-func StartServer(ctx context.Context, cfg *config.ServerConfig, queries *db.Queries, metricsHandler http.Handler) error {
+func New(ctx context.Context, cfg *config.ServerConfig, queries *db.Queries, metricsHandler http.Handler) error {
 	addr := fmt.Sprintf("%s:%s", cfg.HOST, cfg.PORT)
 
 	srv := &http.Server{
 		Addr:         addr,
-		Handler:      router.SetupRouter(queries, metricsHandler),
+		Handler:      router.New(queries, metricsHandler),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
