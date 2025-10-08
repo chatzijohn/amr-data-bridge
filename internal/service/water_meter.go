@@ -5,16 +5,20 @@ import (
 	"context"
 )
 
-type WaterMeterService struct {
-	q *db.Queries
+type WaterMeterStore interface {
+	GetActiveWaterMeters(ctx context.Context) ([]db.WaterMeter, error)
 }
 
-func NewWaterMeterService(q *db.Queries) *WaterMeterService {
-	return &WaterMeterService{q: q}
+type WaterMeterService struct {
+	store WaterMeterStore
+}
+
+func NewWaterMeterService(store WaterMeterStore) *WaterMeterService {
+	return &WaterMeterService{store: store}
 }
 
 // GetActiveWaterMeters returns all active water meters.
 // any business logic, validation, filtering, or caching belongs here.
 func (s *WaterMeterService) GetActiveWaterMeters(ctx context.Context) ([]db.WaterMeter, error) {
-	return s.q.GetActiveWaterMeters(ctx)
+	return s.store.GetActiveWaterMeters(ctx)
 }

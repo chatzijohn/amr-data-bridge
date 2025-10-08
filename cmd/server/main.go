@@ -39,7 +39,7 @@ func main() {
 	queries := db.New(pool)
 
 	// Start HTTP server
-	if err := api.New(ctx, &cfg.SERVER, queries, metricsHandler); err != nil {
+	if err := api.StartServer(ctx, &cfg.SERVER, queries, metricsHandler); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }

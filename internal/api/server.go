@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func New(ctx context.Context, cfg *config.ServerConfig, queries *db.Queries, metricsHandler http.Handler) error {
+func StartServer(ctx context.Context, cfg *config.ServerConfig, queries *db.Queries, metricsHandler http.Handler) error {
 	addr := fmt.Sprintf("%s:%s", cfg.HOST, cfg.PORT)
 
 	srv := &http.Server{
