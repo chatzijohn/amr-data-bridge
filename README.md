@@ -4,7 +4,7 @@ A minimal, performant Go service that ingests external data, transforms it, and 
 
 ---
 
-## 🎯 Project Goals
+## Project Goals
 
 - ✅ Clean, idiomatic Go architecture (no frameworks)
 - ✅ Minimal dependencies — stdlib where possible
@@ -21,7 +21,7 @@ Future roadmap includes:
 
 ---
 
-## 🧩 Core Components
+## Core Components
 
 | Layer                    | Description                                        |
 | ------------------------ | -------------------------------------------------- |
@@ -34,7 +34,7 @@ Future roadmap includes:
 
 ---
 
-## 🛠️ Getting Started
+## Getting Started
 
 ### 1. Clone and configure
 
@@ -57,7 +57,7 @@ Or run directly:
 go run ./cmd/server
 ```
 
-## 📦 Dependencies
+## Dependencies
 
 - Go 1.25.1+
 
