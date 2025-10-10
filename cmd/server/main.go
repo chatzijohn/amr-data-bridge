@@ -7,9 +7,9 @@ package main
 
 import (
 	"amr-data-bridge/config"
-	"amr-data-bridge/internal/api"
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/observability/metrics"
+	httpServer "amr-data-bridge/internal/transport/http"
 	"context"
 	"log"
 	"net/http"
@@ -30,6 +30,7 @@ func main() {
 		log.Fatalf("Unable to connect to DB: %v", err)
 	}
 	defer pool.Close()
+
 	var metricsHandler http.Handler
 	if cfg.TELEMETRY {
 		metricsHandler = metrics.Init()
@@ -39,7 +40,7 @@ func main() {
 	queries := db.New(pool)
 
 	// Start HTTP server
-	if err := api.StartServer(ctx, &cfg.SERVER, queries, metricsHandler); err != nil {
+	if err := httpServer.Start(ctx, &cfg.SERVER, queries, metricsHandler); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }

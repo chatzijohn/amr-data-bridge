@@ -9,14 +9,28 @@ import (
 	"context"
 )
 
-const getActiveWaterMeters = `-- name: GetActiveWaterMeters :many
-SELECT id, "devEUI", "serialNumber", "brandName", "ltPerPulse", "currentReading", "isActive", "alarmStatus", "noFlow", "deviceHandshake", "deviceLogging", "serverHandshake", "serverLogging", "inactivityTimeout", "lastSeen", rssi, snr, "spreadingFactor", "gatewayId", "createdAt", "updatedAt" FROM public."waterMeters"
-WHERE "isActive" = true
-ORDER BY "id" DESC
+const getWaterMeters = `-- name: GetWaterMeters :many
+
+SELECT id, "devEUI", "serialNumber", "brandName", "ltPerPulse", "currentReading", "isActive", "alarmStatus", "noFlow", "deviceHandshake", "deviceLogging", "serverHandshake", "serverLogging", "inactivityTimeout", "lastSeen", rssi, snr, "spreadingFactor", "gatewayId", "createdAt", "updatedAt"
+FROM public."waterMeters"
+WHERE (
+  $2 IS NULL
+  OR "isActive" = $2
+)
+ORDER BY "lastSeen" DESC NULLS LAST
+LIMIT $1
 `
 
-func (q *Queries) GetActiveWaterMeters(ctx context.Context) ([]WaterMeter, error) {
-	rows, err := q.db.Query(ctx, getActiveWaterMeters)
+type GetWaterMetersParams struct {
+	Limit  int32
+	Active interface{}
+}
+
+// Optional filters:
+//   - limit: int (nil = unlimited)
+//   - active: boolean (nil = all)
+func (q *Queries) GetWaterMeters(ctx context.Context, arg GetWaterMetersParams) ([]WaterMeter, error) {
+	rows, err := q.db.Query(ctx, getWaterMeters, arg.Limit, arg.Active)
 	if err != nil {
 		return nil, err
 	}

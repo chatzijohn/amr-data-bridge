@@ -2,8 +2,8 @@ package api
 
 import (
 	"amr-data-bridge/config"
-	"amr-data-bridge/internal/api/router"
 	"amr-data-bridge/internal/db"
+	"amr-data-bridge/internal/transport/http/router"
 	"context"
 	"fmt"
 	"log"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func StartServer(ctx context.Context, cfg *config.ServerConfig, queries *db.Queries, metricsHandler http.Handler) error {
+func Start(ctx context.Context, cfg *config.ServerConfig, queries *db.Queries, metricsHandler http.Handler) error {
 	addr := fmt.Sprintf("%s:%s", cfg.HOST, cfg.PORT)
 
 	srv := &http.Server{

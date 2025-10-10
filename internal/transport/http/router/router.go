@@ -1,10 +1,10 @@
 package router
 
 import (
-	"amr-data-bridge/internal/api/handler"
-	v1 "amr-data-bridge/internal/api/router/v1"
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/service"
+	"amr-data-bridge/internal/transport/http/handler"
+	v1 "amr-data-bridge/internal/transport/http/router/v1"
 	"net/http"
 )
 
