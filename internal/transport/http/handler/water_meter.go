@@ -27,7 +27,7 @@ func NewWaterMeterHandler(svc *service.WaterMeterService) *WaterMeterHandler {
 func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
-	meters, err := h.svc.GetWaterMeters(ctx, db.GetWaterMetersParams{})
+	meters, err := h.svc.GetWaterMeters(ctx, db.GetWaterMetersParams{}) // TODO: future DTO and validation refactor db.GetWaterMetersParams{} ==> active, type, limit params
 	if err != nil {
 		return middleware.NewHttpError(http.StatusInternalServerError, "failed to fetch water meters")
 	}
