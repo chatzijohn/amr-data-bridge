@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getWaterMeters = `-- name: GetWaterMeters :many
@@ -14,8 +16,8 @@ const getWaterMeters = `-- name: GetWaterMeters :many
 SELECT id, "devEUI", "serialNumber", "brandName", "ltPerPulse", "currentReading", "isActive", "alarmStatus", "noFlow", "deviceHandshake", "deviceLogging", "serverHandshake", "serverLogging", "inactivityTimeout", "lastSeen", rssi, snr, "spreadingFactor", "gatewayId", "createdAt", "updatedAt"
 FROM public."waterMeters"
 WHERE (
-  $2 IS NULL
-  OR "isActive" = $2
+  $2::boolean IS NULL
+  OR "isActive" = $2::boolean
 )
 ORDER BY "lastSeen" DESC NULLS LAST
 LIMIT $1
@@ -23,7 +25,7 @@ LIMIT $1
 
 type GetWaterMetersParams struct {
 	Limit  int32
-	Active interface{}
+	Active pgtype.Bool
 }
 
 // Optional filters:

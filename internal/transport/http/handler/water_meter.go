@@ -30,7 +30,7 @@ func NewWaterMeterHandler(svc *service.WaterMeterService) *WaterMeterHandler {
 // @Success      200  {array}  dto.WaterMeterResponse
 // @Failure      400  {object}  middleware.HttpError
 // @Failure      500  {object}  middleware.HttpError
-// @Router       /water-meters/active [get]
+// @Router       /watermeters [get]
 func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 	q := r.URL.Query()

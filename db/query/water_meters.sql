@@ -6,8 +6,8 @@
 SELECT *
 FROM public."waterMeters"
 WHERE (
-  sqlc.narg(active) IS NULL
-  OR "isActive" = sqlc.arg(active)
+  sqlc.narg(active)::boolean IS NULL
+  OR "isActive" = sqlc.arg(active)::boolean
 )
 ORDER BY "lastSeen" DESC NULLS LAST
 LIMIT $1;

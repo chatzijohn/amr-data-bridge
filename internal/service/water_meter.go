@@ -4,7 +4,10 @@ import (
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/dto"
 	"context"
+	"log"
 	"strings"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type WaterMeterStore interface {
@@ -21,19 +24,32 @@ func NewWaterMeterService(store WaterMeterStore) *WaterMeterService {
 
 func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.GetWaterMetersRequest) ([]db.WaterMeter, error) {
 
-	// Map DTO to DB params
-	params := db.GetWaterMetersParams{
-		Limit: req.Limit,
+	const defaultLimit = 10000
+
+	limit := req.Limit
+	if limit <= 0 {
+		limit = defaultLimit
 	}
 
-	// Handle Active pointer (if nil, default false or whatever your DB expects)
+	var active pgtype.Bool
 	if req.Active != nil {
-		params.Active = *req.Active
+		active = pgtype.Bool{
+			Bool:  *req.Active,
+			Valid: true,
+		}
+	} else {
+		active = pgtype.Bool{Valid: false}
+	}
+
+	params := db.GetWaterMetersParams{
+		Limit:  int32(limit),
+		Active: active,
 	}
 
 	// Call repository
 	meters, err := s.store.GetWaterMeters(ctx, params)
 	if err != nil {
+		log.Print(err)
 		return nil, err
 	}
 
