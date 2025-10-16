@@ -4,7 +4,7 @@ package dto
 type WaterMetersRequest struct {
 	Limit  int32  `json:"limit" validate:"gte=0,lte=1000"`
 	Active *bool  `json:"active" validate:"-"`
-	Type   string `json:"type" validate:"omitempty,oneof=json csv"` // Allowed types
+	Type   string `json:"type" validate:"omitempty,oneof=json csv xlsx"` // Allowed types
 }
 
 // Response DTO — what you return to API clients

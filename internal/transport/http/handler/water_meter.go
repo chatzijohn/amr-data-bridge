@@ -91,6 +91,15 @@ func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Reques
 		}
 		return nil
 
+	case "xlsx":
+		w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+		filename := fmt.Sprintf("water_meters_%s.xlsx", time.Now().Format("20060102_150405"))
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+		if err := export.ToExcel(w, meters); err != nil {
+			return middleware.NewHttpError(http.StatusInternalServerError, "failed to export Excel")
+		}
+		return nil
+
 	case "json":
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		if err := json.NewEncoder(w).Encode(meters); err != nil {
