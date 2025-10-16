@@ -3,6 +3,8 @@ package service
 import (
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/dto"
+	"amr-data-bridge/internal/export"
+	"amr-data-bridge/internal/mapper"
 	"context"
 	"log"
 	"strings"
@@ -22,7 +24,7 @@ func NewWaterMeterService(store WaterMeterStore) *WaterMeterService {
 	return &WaterMeterService{store: store}
 }
 
-func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.GetWaterMetersRequest) ([]db.WaterMeter, error) {
+func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.WaterMetersRequest) ([]dto.WaterMeterResponse, error) {
 
 	const defaultLimit = 10000
 
@@ -53,19 +55,19 @@ func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.GetWater
 		return nil, err
 	}
 
+	response := mapper.WaterMetersToDTO(meters)
+
 	// Normalize export type — not passed to repo
 	exportType := strings.ToLower(strings.TrimSpace(req.Type))
-	if exportType == "" {
-		exportType = "json" // default
+
+	switch exportType {
+	default:
+		return response, nil
+	case "csv":
+		return export.ToCSV(response), nil
+
+		// case "xlsx":
+		// 	return exportToXLSX(meters)
 	}
 
-	// 🔜 Future logic:
-	// switch exportType {
-	// case "csv":
-	//     return exportToCSV(meters)
-	// case "xlsx":
-	//     return exportToXLSX(meters)
-	// }
-
-	return meters, nil
 }

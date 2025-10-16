@@ -35,7 +35,7 @@ func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Reques
 	ctx := r.Context()
 	q := r.URL.Query()
 
-	req := dto.GetWaterMetersRequest{}
+	req := dto.WaterMetersRequest{}
 
 	// Parse 'limit' query param (optional)
 	if limitStr := q.Get("limit"); limitStr != "" {
@@ -48,12 +48,19 @@ func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Reques
 
 	// Parse 'active' query param (optional)
 	if activeStr := q.Get("active"); activeStr != "" {
-		active := strings.ToLower(activeStr) == "true"
+		var active bool
+		if strings.ToLower(activeStr) == "true" {
+			active = true
+		} else if strings.ToLower(activeStr) == "false" {
+			active = false
+		} else {
+			return middleware.NewHttpError(http.StatusBadRequest, "active can only be true, false or empty")
+		}
 		req.Active = &active
 	}
 
 	// Parse 'type' query param (optional)
-	req.Type = q.Get("type")
+	req.Type = strings.ToLower(strings.TrimSpace(req.Type))
 
 	// Validate request DTO
 	if err := validate.Struct(req); err != nil {
