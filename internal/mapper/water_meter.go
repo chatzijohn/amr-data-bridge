@@ -3,9 +3,15 @@ package mapper
 import (
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/dto"
+	"time"
 )
 
 func WaterMeterToDTO(m db.WaterMeter) dto.WaterMeterResponse {
+
+	var lastSeen string
+	if m.LastSeen.Valid {
+		lastSeen = m.LastSeen.Time.UTC().Format(time.RFC3339)
+	}
 
 	return dto.WaterMeterResponse{
 		DevEUI:         m.DevEUI,
@@ -16,6 +22,7 @@ func WaterMeterToDTO(m db.WaterMeter) dto.WaterMeterResponse {
 		AlarmStatus:    m.AlarmStatus,
 		NoFlow:         m.NoFlow,
 		CurrentReading: m.CurrentReading.Int32,
+		LastSeen:       lastSeen,
 	}
 }
 

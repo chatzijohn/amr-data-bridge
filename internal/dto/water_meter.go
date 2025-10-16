@@ -3,7 +3,7 @@ package dto
 // Request DTO — what comes from HTTP/API
 type WaterMetersRequest struct {
 	Limit  int32  `json:"limit" validate:"gte=0,lte=1000"`
-	Active *bool  `json:"active" validate:"omitempty"`
+	Active *bool  `json:"active" validate:"-"`
 	Type   string `json:"type" validate:"omitempty,oneof=json csv"` // Allowed types
 }
 
@@ -17,4 +17,6 @@ type WaterMeterResponse struct {
 	AlarmStatus    bool   `json:"alarmStatus"`
 	NoFlow         bool   `json:"noFlow"`
 	CurrentReading int32  `json:"currentReading"`
+	LastSeen       string `json:"lastSeen"` // ISO8601 string for JSON + CSV
+
 }

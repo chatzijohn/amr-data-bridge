@@ -3,11 +3,9 @@ package service
 import (
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/dto"
-	"amr-data-bridge/internal/export"
 	"amr-data-bridge/internal/mapper"
 	"context"
 	"log"
-	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -57,17 +55,6 @@ func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.WaterMet
 
 	response := mapper.WaterMetersToDTO(meters)
 
-	// Normalize export type — not passed to repo
-	exportType := strings.ToLower(strings.TrimSpace(req.Type))
-
-	switch exportType {
-	default:
-		return response, nil
-	case "csv":
-		return export.ToCSV(response), nil
-
-		// case "xlsx":
-		// 	return exportToXLSX(meters)
-	}
+	return response, nil
 
 }

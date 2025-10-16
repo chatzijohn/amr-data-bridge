@@ -2,12 +2,15 @@ package handler
 
 import (
 	"amr-data-bridge/internal/dto"
+	"amr-data-bridge/internal/export"
 	"amr-data-bridge/internal/service"
 	"amr-data-bridge/internal/transport/http/middleware"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -35,49 +38,67 @@ func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Reques
 	ctx := r.Context()
 	q := r.URL.Query()
 
-	req := dto.WaterMetersRequest{}
+	var req dto.WaterMetersRequest
 
-	// Parse 'limit' query param (optional)
+	// Parse limit
 	if limitStr := q.Get("limit"); limitStr != "" {
 		limit, err := strconv.Atoi(limitStr)
 		if err != nil {
-			return middleware.NewHttpError(http.StatusBadRequest, "invalid limit parameter")
+			return middleware.NewHttpError(http.StatusBadRequest, "invalid 'limit' parameter")
 		}
 		req.Limit = int32(limit)
 	}
 
-	// Parse 'active' query param (optional)
+	// Parse active
 	if activeStr := q.Get("active"); activeStr != "" {
-		var active bool
-		if strings.ToLower(activeStr) == "true" {
-			active = true
-		} else if strings.ToLower(activeStr) == "false" {
-			active = false
-		} else {
-			return middleware.NewHttpError(http.StatusBadRequest, "active can only be true, false or empty")
+		switch strings.ToLower(activeStr) {
+		case "true":
+			val := true
+			req.Active = &val
+		case "false":
+			val := false
+			req.Active = &val
+		default:
+			return middleware.NewHttpError(http.StatusBadRequest, "'active' must be true, false, or omitted")
 		}
-		req.Active = &active
 	}
 
-	// Parse 'type' query param (optional)
-	req.Type = strings.ToLower(strings.TrimSpace(req.Type))
+	// Parse and normalize type
+	req.Type = strings.ToLower(strings.TrimSpace(q.Get("type")))
+	if req.Type == "" {
+		req.Type = "json" // default format
+	}
 
-	// Validate request DTO
+	// Validate request DTO (enforces oneof=json csv)
 	if err := validate.Struct(req); err != nil {
 		return middleware.NewHttpError(http.StatusBadRequest, "validation error: "+err.Error())
 	}
 
-	// Call service with DTO
+	// Call service
 	meters, err := h.svc.GetWaterMeters(ctx, req)
 	if err != nil {
 		return middleware.NewHttpError(http.StatusInternalServerError, "failed to fetch water meters")
 	}
 
-	// Encode response
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(meters); err != nil {
-		return middleware.NewHttpError(http.StatusInternalServerError, "failed to encode response")
-	}
+	// Encode response based on validated type
+	switch req.Type {
+	case "csv":
+		w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+		filename := fmt.Sprintf("water_meters_%s.csv", time.Now().Format("20060102_150405"))
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+		if err := export.ToCSV(w, meters); err != nil {
+			return middleware.NewHttpError(http.StatusInternalServerError, "failed to export CSV")
+		}
+		return nil
 
-	return nil
+	case "json":
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		if err := json.NewEncoder(w).Encode(meters); err != nil {
+			return middleware.NewHttpError(http.StatusInternalServerError, "failed to encode JSON response")
+		}
+		return nil
+
+	default:
+		return middleware.NewHttpError(http.StatusBadRequest, "unsupported export type")
+	}
 }
