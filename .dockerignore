@@ -1,0 +1,53 @@
+# Binaries
+amr-data-bridge
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build artifacts
+/bin
+/build
+/dist
+/out
+
+# Go build cache
+*.test
+*.out
+*.log
+cover.*
+coverage/
+debug/
+
+# Dependency directories
+vendor/
+
+# Git & CI files
+.git
+.gitignore
+.gitattributes
+.github/
+.gitlab-ci.yml
+
+# Editor & IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env & config (if mounted separately)
+.env
+.env.*
+*.local
+
+# Docs & misc
+README.md
+LICENSE
+docs/
+examples/
