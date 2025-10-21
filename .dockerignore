@@ -4,6 +4,8 @@ amr-data-bridge
 *.dll
 *.so
 *.dylib
+*.tar*
+*.tar.gz
 
 # Build artifacts
 /bin
