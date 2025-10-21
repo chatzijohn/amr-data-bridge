@@ -17,7 +17,7 @@ func NewWaterMeterRepository(q *db.Queries) *WaterMeterRepository {
 
 // GetWaterMeters returns all active water meters.
 // any business logic, validation, filtering, or caching belongs here.
-func (r *WaterMeterRepository) GetWaterMeters(ctx context.Context, arg db.GetWaterMetersParams) ([]db.WaterMeter, error) {
+func (r *WaterMeterRepository) GetWaterMeters(ctx context.Context, arg db.GetWaterMetersParams) ([]db.GetWaterMetersRow, error) {
 	meters, err := r.queries.GetWaterMeters(ctx, arg)
 	if err != nil {
 		return nil, fmt.Errorf("get water meters: %w", err)

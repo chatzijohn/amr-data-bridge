@@ -8,6 +8,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/xuri/excelize/v2 v2.10.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

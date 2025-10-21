@@ -43,6 +43,23 @@ func ToExcel[T any](w io.Writer, data []T) error {
 		fieldIndexes = append(fieldIndexes, i)
 	}
 
+	// Make header row bold and freeze top row
+	style, _ := f.NewStyle(&excelize.Style{
+		Font:      &excelize.Font{Bold: true},
+		Alignment: &excelize.Alignment{Horizontal: "center"},
+	})
+	headerRange, _ := excelize.CoordinatesToCellName(1, 1)
+	lastHeaderCell, _ := excelize.CoordinatesToCellName(len(headers), 1)
+	f.SetCellStyle(sheetName, headerRange, lastHeaderCell, style)
+	f.SetPanes(sheetName, &excelize.Panes{
+		Freeze:      true,
+		Split:       true,
+		XSplit:      0,
+		YSplit:      1,
+		TopLeftCell: "A2",
+		ActivePane:  "bottomLeft",
+	})
+
 	// Write headers to Excel (first row)
 	for i, header := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)

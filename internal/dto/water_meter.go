@@ -9,6 +9,7 @@ type WaterMetersRequest struct {
 
 // Response DTO — what you return to API clients
 type WaterMeterResponse struct {
+	SupplyNumber   string `json:"SupplyNumber"`
 	DevEUI         string `json:"devEUI"`
 	SerialNumber   string `json:"serialNumber"`
 	BrandName      string `json:"brandName"`
@@ -18,5 +19,4 @@ type WaterMeterResponse struct {
 	NoFlow         bool   `json:"noFlow"`
 	CurrentReading int32  `json:"currentReading"`
 	LastSeen       string `json:"lastSeen"` // ISO8601 string for JSON + CSV
-
 }

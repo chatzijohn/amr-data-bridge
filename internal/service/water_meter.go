@@ -1,6 +1,7 @@
 package service
 
 import (
+	"amr-data-bridge/internal"
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/dto"
 	"amr-data-bridge/internal/mapper"
@@ -11,15 +12,21 @@ import (
 )
 
 type WaterMeterStore interface {
-	GetWaterMeters(ctx context.Context, arg db.GetWaterMetersParams) ([]db.WaterMeter, error)
+	GetWaterMeters(ctx context.Context, arg db.GetWaterMetersParams) ([]db.GetWaterMetersRow, error)
 }
 
+// WaterMeterService provides business logic for water meters.
 type WaterMeterService struct {
 	store WaterMeterStore
+	prefs *internal.Preferences
 }
 
-func NewWaterMeterService(store WaterMeterStore) *WaterMeterService {
-	return &WaterMeterService{store: store}
+// NewWaterMeterService creates a new WaterMeterService.
+func NewWaterMeterService(store WaterMeterStore, prefs *internal.Preferences) *WaterMeterService {
+	return &WaterMeterService{
+		store: store,
+		prefs: prefs,
+	}
 }
 
 func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.WaterMetersRequest) ([]dto.WaterMeterResponse, error) {
@@ -53,7 +60,8 @@ func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.WaterMet
 		return nil, err
 	}
 
-	response := mapper.WaterMetersToDTO(meters)
+	// Map DB results to DTOs with preferences applied
+	response := mapper.WaterMetersToDTO(meters, s.prefs)
 
 	return response, nil
 

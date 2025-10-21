@@ -1,6 +1,7 @@
 package router
 
 import (
+	"amr-data-bridge/internal"
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/service"
 	"amr-data-bridge/internal/transport/http/handler"
@@ -8,19 +9,27 @@ import (
 	"net/http"
 )
 
-func New(queries *db.Queries, metricsHandler http.Handler) http.Handler {
+// New creates and configures the main HTTP router.
+// It now accepts preferences so that handlers and services can respect user settings.
+func New(queries *db.Queries, prefs *internal.Preferences, metricsHandler http.Handler) http.Handler {
 	mux := http.NewServeMux()
 
-	svcs := service.New(queries)
+	// Initialize service layer with preferences
+	svcs := service.New(queries, prefs)
+
+	// Initialize handlers with preferences
 	h := handler.New(svcs)
 
+	// Health check route
 	mux.HandleFunc("/health", handler.HealthCheck)
 
+	// Optional Prometheus metrics
 	if metricsHandler != nil {
-		// Add Prometheus /metrics
 		mux.Handle("/metrics", metricsHandler)
 	}
 
+	// Register versioned routes (v1)
 	v1.RegisterWatermeterRoutes(mux, h)
+
 	return mux
 }

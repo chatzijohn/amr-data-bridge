@@ -2,6 +2,7 @@ package api
 
 import (
 	"amr-data-bridge/config"
+	"amr-data-bridge/internal"
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/transport/http/router"
 	"context"
@@ -14,9 +15,16 @@ import (
 func Start(ctx context.Context, cfg *config.ServerConfig, queries *db.Queries, metricsHandler http.Handler) error {
 	addr := fmt.Sprintf("%s:%s", cfg.HOST, cfg.PORT)
 
+	// Load User Defined Prefernces
+	// Eg. export fields
+	prefs, err := internal.LoadPreferences("preferences.yaml")
+	if err != nil {
+		return fmt.Errorf("failed to load preferences: %w", err)
+	}
+
 	srv := &http.Server{
 		Addr:         addr,
-		Handler:      router.New(queries, metricsHandler),
+		Handler:      router.New(queries, prefs, metricsHandler),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,

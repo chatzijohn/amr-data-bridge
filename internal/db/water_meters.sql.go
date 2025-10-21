@@ -11,15 +11,62 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getWaterMeterBySerial = `-- name: GetWaterMeterBySerial :one
+SELECT id, "devEUI", "serialNumber", "brandName", "ltPerPulse", "currentReading", "isActive", "alarmStatus", "noFlow", "deviceHandshake", "deviceLogging", "serverHandshake", "serverLogging", "inactivityTimeout", "lastSeen", rssi, snr, "spreadingFactor", "gatewayId", "createdAt", "updatedAt" FROM public."waterMeters"
+WHERE "serialNumber" = $1
+LIMIT 1
+`
+
+func (q *Queries) GetWaterMeterBySerial(ctx context.Context, serialnumber string) (WaterMeter, error) {
+	row := q.db.QueryRow(ctx, getWaterMeterBySerial, serialnumber)
+	var i WaterMeter
+	err := row.Scan(
+		&i.ID,
+		&i.DevEUI,
+		&i.SerialNumber,
+		&i.BrandName,
+		&i.LtPerPulse,
+		&i.CurrentReading,
+		&i.IsActive,
+		&i.AlarmStatus,
+		&i.NoFlow,
+		&i.DeviceHandshake,
+		&i.DeviceLogging,
+		&i.ServerHandshake,
+		&i.ServerLogging,
+		&i.InactivityTimeout,
+		&i.LastSeen,
+		&i.Rssi,
+		&i.Snr,
+		&i.SpreadingFactor,
+		&i.GatewayId,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getWaterMeters = `-- name: GetWaterMeters :many
 
-SELECT id, "devEUI", "serialNumber", "brandName", "ltPerPulse", "currentReading", "isActive", "alarmStatus", "noFlow", "deviceHandshake", "deviceLogging", "serverHandshake", "serverLogging", "inactivityTimeout", "lastSeen", rssi, snr, "spreadingFactor", "gatewayId", "createdAt", "updatedAt"
-FROM public."waterMeters"
+SELECT
+    wm."devEUI",
+    wm."serialNumber",
+    wm."brandName",
+    wm."ltPerPulse",
+    wm."isActive",
+    wm."alarmStatus",
+    wm."noFlow",
+    wm."currentReading",
+    wm."lastSeen",
+    ws."supplyNumber"
+FROM public."waterMeters" AS wm
+LEFT JOIN public."waterSupplies" AS ws
+    ON wm."devEUI" = ws."waterMeterDevEUI"
 WHERE (
-  $2::boolean IS NULL
-  OR "isActive" = $2::boolean
+    $2::boolean IS NULL
+    OR wm."isActive" = $2::boolean
 )
-ORDER BY "lastSeen" DESC NULLS LAST
+ORDER BY wm."lastSeen" DESC NULLS LAST
 LIMIT $1
 `
 
@@ -28,40 +75,42 @@ type GetWaterMetersParams struct {
 	Active pgtype.Bool
 }
 
+type GetWaterMetersRow struct {
+	DevEUI         string
+	SerialNumber   string
+	BrandName      string
+	LtPerPulse     int32
+	IsActive       bool
+	AlarmStatus    bool
+	NoFlow         bool
+	CurrentReading pgtype.Int4
+	LastSeen       pgtype.Timestamp
+	SupplyNumber   pgtype.Text
+}
+
 // Optional filters:
 //   - limit: int (nil = unlimited)
 //   - active: boolean (nil = all)
-func (q *Queries) GetWaterMeters(ctx context.Context, arg GetWaterMetersParams) ([]WaterMeter, error) {
+func (q *Queries) GetWaterMeters(ctx context.Context, arg GetWaterMetersParams) ([]GetWaterMetersRow, error) {
 	rows, err := q.db.Query(ctx, getWaterMeters, arg.Limit, arg.Active)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []WaterMeter
+	var items []GetWaterMetersRow
 	for rows.Next() {
-		var i WaterMeter
+		var i GetWaterMetersRow
 		if err := rows.Scan(
-			&i.ID,
 			&i.DevEUI,
 			&i.SerialNumber,
 			&i.BrandName,
 			&i.LtPerPulse,
-			&i.CurrentReading,
 			&i.IsActive,
 			&i.AlarmStatus,
 			&i.NoFlow,
-			&i.DeviceHandshake,
-			&i.DeviceLogging,
-			&i.ServerHandshake,
-			&i.ServerLogging,
-			&i.InactivityTimeout,
+			&i.CurrentReading,
 			&i.LastSeen,
-			&i.Rssi,
-			&i.Snr,
-			&i.SpreadingFactor,
-			&i.GatewayId,
-			&i.CreatedAt,
-			&i.UpdatedAt,
+			&i.SupplyNumber,
 		); err != nil {
 			return nil, err
 		}
@@ -71,4 +120,21 @@ func (q *Queries) GetWaterMeters(ctx context.Context, arg GetWaterMetersParams) 
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateWaterMeterActiveStatus = `-- name: UpdateWaterMeterActiveStatus :exec
+UPDATE public."waterMeters"
+SET "isActive" = $2,
+    "updatedAt" = NOW()
+WHERE "serialNumber" = $1
+`
+
+type UpdateWaterMeterActiveStatusParams struct {
+	SerialNumber string
+	IsActive     bool
+}
+
+func (q *Queries) UpdateWaterMeterActiveStatus(ctx context.Context, arg UpdateWaterMeterActiveStatusParams) error {
+	_, err := q.db.Exec(ctx, updateWaterMeterActiveStatus, arg.SerialNumber, arg.IsActive)
+	return err
 }
