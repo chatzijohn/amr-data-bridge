@@ -17,8 +17,9 @@ type DBConfig struct {
 }
 
 type ServerConfig struct {
-	PORT string
-	HOST string
+	PORT        string
+	HOST        string
+	PREFERENCES string
 }
 
 type AppConfig struct {
@@ -50,8 +51,9 @@ func Load() *AppConfig {
 
 	// Server configuration
 	server := ServerConfig{
-		HOST: getEnvWithDefault("HOST", "127.0.0.1"),
-		PORT: getEnvWithDefault("PORT", "8080"),
+		HOST:        getEnvWithDefault("HOST", "127.0.0.1"),
+		PORT:        getEnvWithDefault("PORT", "8080"),
+		PREFERENCES: strings.ToLower(getEnvWithDefault("PREFERENCES_FILE", "./preferences.yaml")),
 	}
 
 	return &AppConfig{ENVIRONMENT: environment, TELEMETRY: telemetry, DB: db, SERVER: server}

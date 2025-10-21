@@ -17,7 +17,7 @@ func Start(ctx context.Context, cfg *config.ServerConfig, queries *db.Queries, m
 
 	// Load User Defined Prefernces
 	// Eg. export fields
-	prefs, err := internal.LoadPreferences("preferences.yaml")
+	prefs, err := internal.LoadPreferences(cfg.PREFERENCES)
 	if err != nil {
 		return fmt.Errorf("failed to load preferences: %w", err)
 	}

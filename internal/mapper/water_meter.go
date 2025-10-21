@@ -32,30 +32,30 @@ func WaterMeterToDTO(m db.GetWaterMetersRow, prefs *internal.Preferences) dto.Wa
 	// Conditionally populate DTO fields based on preferences.
 	var res dto.WaterMeterResponse
 
-	if _, ok := allowed["DevEUI"]; ok {
-		res.DevEUI = m.DevEUI
-	}
+	// if _, ok := allowed["DevEUI"]; ok {
+	// 	res.DevEUI = m.DevEUI
+	// }
 	if _, ok := allowed["SupplyNumber"]; ok {
 		res.SupplyNumber = supplyNumber
 	}
 	if _, ok := allowed["SerialNumber"]; ok {
 		res.SerialNumber = m.SerialNumber
 	}
-	if _, ok := allowed["BrandName"]; ok {
-		res.BrandName = m.BrandName
-	}
-	if _, ok := allowed["LtPerPulse"]; ok {
-		res.LtPerPulse = m.LtPerPulse
-	}
-	if _, ok := allowed["IsActive"]; ok {
-		res.IsActive = m.IsActive
-	}
-	if _, ok := allowed["AlarmStatus"]; ok {
-		res.AlarmStatus = m.AlarmStatus
-	}
-	if _, ok := allowed["NoFlow"]; ok {
-		res.NoFlow = m.NoFlow
-	}
+	// if _, ok := allowed["BrandName"]; ok {
+	// 	res.BrandName = m.BrandName
+	// }
+	// if _, ok := allowed["LtPerPulse"]; ok {
+	// 	res.LtPerPulse = m.LtPerPulse
+	// }
+	// if _, ok := allowed["IsActive"]; ok {
+	// 	res.IsActive = m.IsActive
+	// }
+	// if _, ok := allowed["AlarmStatus"]; ok {
+	// 	res.AlarmStatus = m.AlarmStatus
+	// }
+	// if _, ok := allowed["NoFlow"]; ok {
+	// 	res.NoFlow = m.NoFlow
+	// }
 	if _, ok := allowed["CurrentReading"]; ok {
 		res.CurrentReading = m.CurrentReading.Int32
 	}
