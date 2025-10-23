@@ -51,7 +51,7 @@ func Load() *AppConfig {
 
 	// Server configuration
 	server := ServerConfig{
-		HOST:        getEnvWithDefault("HOST", "127.0.0.1"),
+		HOST:        getEnvWithDefault("HOST", "0.0.0.0"),
 		PORT:        getEnvWithDefault("PORT", "8080"),
 		PREFERENCES: strings.ToLower(getEnvWithDefault("PREFERENCES_FILE", "./preferences.yaml")),
 	}
