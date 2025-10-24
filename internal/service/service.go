@@ -1,7 +1,7 @@
 package service
 
 import (
-	"amr-data-bridge/internal"
+	"amr-data-bridge/config"
 	"amr-data-bridge/internal/db"
 )
 
@@ -12,7 +12,7 @@ type Services struct {
 
 // New initializes the main Services struct with all dependencies.
 // It now accepts preferences, which are shared across sub-services.
-func New(q *db.Queries, prefs *internal.Preferences) *Services {
+func New(q *db.Queries, prefs *config.Preferences) *Services {
 	return &Services{
 		WaterMeter: NewWaterMeterService(q, prefs),
 	}

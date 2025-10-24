@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"amr-data-bridge/config"
 	"amr-data-bridge/internal/service"
 	"net/http"
 )
@@ -10,9 +11,9 @@ type Handlers struct {
 }
 
 // New initializes the main handler struct
-func New(svc *service.Services) *Handlers {
+func New(svc *service.Services, prefs *config.Preferences) *Handlers {
 	return &Handlers{
-		WaterMeter: NewWaterMeterHandler(svc.WaterMeter),
+		WaterMeter: NewWaterMeterHandler(svc.WaterMeter, prefs),
 	}
 }
 

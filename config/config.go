@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
+	"gopkg.in/yaml.v3"
 )
 
 type DBConfig struct {
@@ -27,6 +28,14 @@ type AppConfig struct {
 	ENVIRONMENT string
 	TELEMETRY   bool
 	SERVER      ServerConfig
+}
+
+type ExportPreferences struct {
+	WaterMeterFields []string `yaml:"water_meter_fields"`
+}
+
+type Preferences struct {
+	Export ExportPreferences `yaml:"export"`
 }
 
 func Load() *AppConfig {
@@ -66,4 +75,19 @@ func getEnvWithDefault(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+// LoadPreferences loads preferences.yaml from disk.
+func LoadPreferences(path string) (*Preferences, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var prefs Preferences
+	if err := yaml.Unmarshal(data, &prefs); err != nil {
+		return nil, err
+	}
+
+	return &prefs, nil
 }

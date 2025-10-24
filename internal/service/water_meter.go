@@ -1,7 +1,7 @@
 package service
 
 import (
-	"amr-data-bridge/internal"
+	"amr-data-bridge/config"
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/dto"
 	"amr-data-bridge/internal/mapper"
@@ -18,11 +18,11 @@ type WaterMeterStore interface {
 // WaterMeterService provides business logic for water meters.
 type WaterMeterService struct {
 	store WaterMeterStore
-	prefs *internal.Preferences
+	prefs *config.Preferences
 }
 
 // NewWaterMeterService creates a new WaterMeterService.
-func NewWaterMeterService(store WaterMeterStore, prefs *internal.Preferences) *WaterMeterService {
+func NewWaterMeterService(store WaterMeterStore, prefs *config.Preferences) *WaterMeterService {
 	return &WaterMeterService{
 		store: store,
 		prefs: prefs,

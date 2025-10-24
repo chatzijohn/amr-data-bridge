@@ -2,7 +2,7 @@ export:
   water_meter_fields:
     - SupplyNumber
     - SerialNumber
-    - LtPerPulse
-    - IsActive
+    # - LtPerPulse
+    # - IsActive
     - CurrentReading
     - LastSeen

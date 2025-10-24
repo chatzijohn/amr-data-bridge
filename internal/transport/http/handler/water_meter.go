@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"amr-data-bridge/config"
 	"amr-data-bridge/internal/dto"
 	"amr-data-bridge/internal/export"
 	"amr-data-bridge/internal/service"
@@ -18,11 +19,15 @@ import (
 var validate = validator.New()
 
 type WaterMeterHandler struct {
-	svc *service.WaterMeterService
+	svc   *service.WaterMeterService
+	prefs *config.Preferences
 }
 
-func NewWaterMeterHandler(svc *service.WaterMeterService) *WaterMeterHandler {
-	return &WaterMeterHandler{svc: svc}
+func NewWaterMeterHandler(svc *service.WaterMeterService, prefs *config.Preferences) *WaterMeterHandler {
+	return &WaterMeterHandler{
+		svc:   svc,
+		prefs: prefs,
+	}
 }
 
 // GetWaterMeters godoc
@@ -86,7 +91,7 @@ func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Reques
 		w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 		filename := fmt.Sprintf("water_meters_%s.csv", time.Now().Format("20060102_150405"))
 		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
-		if err := export.ToCSV(w, meters); err != nil {
+		if err := export.ToCSV(w, meters, h.prefs.Export.WaterMeterFields); err != nil {
 			return middleware.NewHttpError(http.StatusInternalServerError, "failed to export CSV")
 		}
 		return nil
@@ -95,7 +100,7 @@ func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Reques
 		w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 		filename := fmt.Sprintf("water_meters_%s.xlsx", time.Now().Format("20060102_150405"))
 		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
-		if err := export.ToExcel(w, meters); err != nil {
+		if err := export.ToExcel(w, meters, h.prefs.Export.WaterMeterFields); err != nil {
 			return middleware.NewHttpError(http.StatusInternalServerError, "failed to export Excel")
 		}
 		return nil

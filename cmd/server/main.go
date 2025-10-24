@@ -36,11 +36,18 @@ func main() {
 		metricsHandler = metrics.Init()
 	}
 
+	// Load User Defined Preferences
+	// Eg. export fields
+	prefs, err := config.LoadPreferences(cfg.SERVER.PREFERENCES)
+	if err != nil {
+		log.Fatalf("Failed to load preferences: %v", err)
+	}
+
 	// sqlc Queries instance
 	queries := db.New(pool)
 
 	// Start HTTP server
-	if err := httpServer.Start(ctx, &cfg.SERVER, queries, metricsHandler); err != nil {
+	if err := httpServer.Start(ctx, &cfg.SERVER, queries, prefs, metricsHandler); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }

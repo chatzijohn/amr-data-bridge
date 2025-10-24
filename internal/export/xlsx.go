@@ -5,31 +5,45 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 
 	"github.com/xuri/excelize/v2"
 )
 
-func ToExcel[T any](w io.Writer, data []T) error {
-	if len(data) == 0 {
+func ToExcel(w io.Writer, data interface{}, allowedFields []string) error {
+	if reflect.ValueOf(data).Len() == 0 {
 		return errors.New("no data to export")
 	}
 
 	f := excelize.NewFile()
 	sheetName := "Sheet1"
 
-	t := reflect.TypeOf(data[0])
-	if t.Kind() == reflect.Pointer {
-		t = t.Elem()
+	// Convert interface{} to reflect.Value
+	v := reflect.ValueOf(data)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
 	}
-	if t.Kind() != reflect.Struct {
-		return errors.New("ToExcel: T must be a struct type")
+	
+	if v.Len() == 0 {
+		return errors.New("no data to export")
 	}
 
-	// --- Headers ---
-	headers := make([]string, 0, t.NumField())
-	fieldIndexes := make([]int, 0, t.NumField())
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
+	// Get the element type to process struct fields
+	elemType := v.Index(0).Type()
+	if elemType.Kind() == reflect.Ptr {
+		elemType = elemType.Elem()
+	}
+	
+	if elemType.Kind() != reflect.Struct {
+		return errors.New("ToExcel: data must contain structs")
+	}
+
+	// Create a mapping from field names to field indices based on allowed fields
+	headers := make([]string, 0)
+	fieldIndexes := make([]int, 0)
+	
+	for i := 0; i < elemType.NumField(); i++ {
+		field := elemType.Field(i)
 		if field.PkgPath != "" {
 			continue
 		}
@@ -37,10 +51,29 @@ func ToExcel[T any](w io.Writer, data []T) error {
 		tag := field.Tag.Get("json")
 		if tag == "" || tag == "-" {
 			tag = field.Name
+		} else {
+			// Remove omitempty and other options, keep only the field name
+			tag = strings.Split(tag, ",")[0]
 		}
 
-		headers = append(headers, tag)
-		fieldIndexes = append(fieldIndexes, i)
+		// Check if this field name is in the allowed fields list
+		fieldName := field.Name // This is the struct field name like "SupplyNumber", "SerialNumber", etc.
+		allowed := false
+		for _, allowedField := range allowedFields {
+			if allowedField == fieldName {
+				allowed = true
+				break
+			}
+		}
+
+		if allowed {
+			headers = append(headers, tag)
+			fieldIndexes = append(fieldIndexes, i)
+		}
+	}
+
+	if len(headers) == 0 {
+		return errors.New("no fields to export based on preferences")
 	}
 
 	// Make header row bold and freeze top row
@@ -67,14 +100,14 @@ func ToExcel[T any](w io.Writer, data []T) error {
 	}
 
 	// --- Data Rows ---
-	for rowIdx, record := range data {
-		v := reflect.ValueOf(record)
-		if v.Kind() == reflect.Pointer {
-			v = v.Elem()
+	for rowIdx := 0; rowIdx < v.Len(); rowIdx++ {
+		record := v.Index(rowIdx)
+		if record.Kind() == reflect.Ptr {
+			record = record.Elem()
 		}
 
 		for colIdx, fieldIdx := range fieldIndexes {
-			fieldVal := v.Field(fieldIdx)
+			fieldVal := record.Field(fieldIdx)
 			var cellVal any
 
 			if fieldVal.Kind() == reflect.Pointer {
