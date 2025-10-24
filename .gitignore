@@ -45,4 +45,4 @@ devenv.local.nix
 .pre-commit-config.yaml
 *.tar.gz
 
-/build
+build/
