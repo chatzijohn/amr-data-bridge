@@ -12,7 +12,7 @@ import (
 )
 
 const getWaterSupplyByNumber = `-- name: GetWaterSupplyByNumber :one
-SELECT id, "supplyNumber", geometry, "waterMeterDevEUI", "currentImage", "previousImage", "createdAt", "updatedAt" FROM "waterSupplies" WHERE "supplyNumber" = $1 LIMIT 1
+SELECT id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt" FROM "waterSupplies" WHERE "supplyNumber" = $1 LIMIT 1
 `
 
 func (q *Queries) GetWaterSupplyByNumber(ctx context.Context, supplynumber string) (WaterSupply, error) {
@@ -22,7 +22,7 @@ func (q *Queries) GetWaterSupplyByNumber(ctx context.Context, supplynumber strin
 		&i.ID,
 		&i.SupplyNumber,
 		&i.Geometry,
-		&i.WaterMeterDevEUI,
+		&i.WaterMeterSerialNumber,
 		&i.CurrentImage,
 		&i.PreviousImage,
 		&i.CreatedAt,
@@ -32,16 +32,16 @@ func (q *Queries) GetWaterSupplyByNumber(ctx context.Context, supplynumber strin
 }
 
 const insertWaterSupply = `-- name: InsertWaterSupply :one
-INSERT INTO "waterSupplies" ("supplyNumber", geometry, "waterMeterDevEUI", "createdAt", "updatedAt")
+INSERT INTO "waterSupplies" ("supplyNumber", geometry, "waterMeterSerialNumber", "createdAt", "updatedAt")
 VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4, NOW(), NOW())
-RETURNING id, "supplyNumber", geometry, "waterMeterDevEUI", "currentImage", "previousImage", "createdAt", "updatedAt"
+RETURNING id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt"
 `
 
 type InsertWaterSupplyParams struct {
-	SupplyNumber     string
-	StMakepoint      interface{}
-	StMakepoint_2    interface{}
-	WaterMeterDevEUI pgtype.Text
+	SupplyNumber           string
+	StMakepoint            interface{}
+	StMakepoint_2          interface{}
+	WaterMeterSerialNumber pgtype.Text
 }
 
 func (q *Queries) InsertWaterSupply(ctx context.Context, arg InsertWaterSupplyParams) (WaterSupply, error) {
@@ -49,14 +49,14 @@ func (q *Queries) InsertWaterSupply(ctx context.Context, arg InsertWaterSupplyPa
 		arg.SupplyNumber,
 		arg.StMakepoint,
 		arg.StMakepoint_2,
-		arg.WaterMeterDevEUI,
+		arg.WaterMeterSerialNumber,
 	)
 	var i WaterSupply
 	err := row.Scan(
 		&i.ID,
 		&i.SupplyNumber,
 		&i.Geometry,
-		&i.WaterMeterDevEUI,
+		&i.WaterMeterSerialNumber,
 		&i.CurrentImage,
 		&i.PreviousImage,
 		&i.CreatedAt,
@@ -68,17 +68,17 @@ func (q *Queries) InsertWaterSupply(ctx context.Context, arg InsertWaterSupplyPa
 const updateWaterSupply = `-- name: UpdateWaterSupply :one
 UPDATE "waterSupplies"
 SET geometry = ST_SetSRID(ST_MakePoint($2, $3), 4326),
-    "waterMeterDevEUI" = $4,
+    "waterMeterSerialNumber" = $4,
     "updatedAt" = NOW()
 WHERE "supplyNumber" = $1
-RETURNING id, "supplyNumber", geometry, "waterMeterDevEUI", "currentImage", "previousImage", "createdAt", "updatedAt"
+RETURNING id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt"
 `
 
 type UpdateWaterSupplyParams struct {
-	SupplyNumber     string
-	StMakepoint      interface{}
-	StMakepoint_2    interface{}
-	WaterMeterDevEUI pgtype.Text
+	SupplyNumber           string
+	StMakepoint            interface{}
+	StMakepoint_2          interface{}
+	WaterMeterSerialNumber pgtype.Text
 }
 
 func (q *Queries) UpdateWaterSupply(ctx context.Context, arg UpdateWaterSupplyParams) (WaterSupply, error) {
@@ -86,14 +86,14 @@ func (q *Queries) UpdateWaterSupply(ctx context.Context, arg UpdateWaterSupplyPa
 		arg.SupplyNumber,
 		arg.StMakepoint,
 		arg.StMakepoint_2,
-		arg.WaterMeterDevEUI,
+		arg.WaterMeterSerialNumber,
 	)
 	var i WaterSupply
 	err := row.Scan(
 		&i.ID,
 		&i.SupplyNumber,
 		&i.Geometry,
-		&i.WaterMeterDevEUI,
+		&i.WaterMeterSerialNumber,
 		&i.CurrentImage,
 		&i.PreviousImage,
 		&i.CreatedAt,

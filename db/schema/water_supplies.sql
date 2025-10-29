@@ -2,7 +2,7 @@ CREATE TABLE public."waterSupplies" (
     id SERIAL PRIMARY KEY,
     "supplyNumber" VARCHAR(255) NOT NULL,
     geometry public.geometry(point) NOT NULL,
-    "waterMeterDevEUI" VARCHAR(255),
+    "waterMeterSerialNumber" VARCHAR(255),
     "currentImage" VARCHAR(255),
     "previousImage" VARCHAR(255),
     "createdAt" TIMESTAMP NOT NULL,

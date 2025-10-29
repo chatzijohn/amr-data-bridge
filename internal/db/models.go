@@ -49,12 +49,12 @@ type WaterMeter struct {
 }
 
 type WaterSupply struct {
-	ID               int32
-	SupplyNumber     string
-	Geometry         interface{}
-	WaterMeterDevEUI pgtype.Text
-	CurrentImage     pgtype.Text
-	PreviousImage    pgtype.Text
-	CreatedAt        pgtype.Timestamp
-	UpdatedAt        pgtype.Timestamp
+	ID                     int32
+	SupplyNumber           string
+	Geometry               interface{}
+	WaterMeterSerialNumber pgtype.Text
+	CurrentImage           pgtype.Text
+	PreviousImage          pgtype.Text
+	CreatedAt              pgtype.Timestamp
+	UpdatedAt              pgtype.Timestamp
 }
