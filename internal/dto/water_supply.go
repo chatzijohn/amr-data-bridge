@@ -8,3 +8,14 @@ type WaterSupplyRequest struct {
 	SerialNumber string  `json:"serialNumber,omitempty"`
 	Active       bool    `json:"Active,omitempty"`
 }
+
+// Response DTO — what we send back to the client
+type WaterSupplyResponse struct {
+	ID           int64   `json:"id"`
+	SupplyNumber string  `json:"supplyNumber"`
+	Latitude     float64 `json:"latitude"`
+	Longitude    float64 `json:"longitude"`
+	SerialNumber string  `json:"serialNumber,omitempty"`
+	CreatedAt    string  `json:"createdAt"`
+	UpdatedAt    string  `json:"updatedAt"`
+}
