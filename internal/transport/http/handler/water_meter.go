@@ -16,17 +16,23 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-var validate = validator.New()
-
+// WaterMeterHandler handles HTTP routes for water meters.
 type WaterMeterHandler struct {
-	svc   *service.WaterMeterService
-	prefs *config.Preferences
+	svc      *service.WaterMeterService
+	prefs    *config.Preferences
+	validate *validator.Validate
 }
 
-func NewWaterMeterHandler(svc *service.WaterMeterService, prefs *config.Preferences) *WaterMeterHandler {
+// NewWaterMeterHandler creates a new WaterMeterHandler with dependencies.
+func NewWaterMeterHandler(
+	svc *service.WaterMeterService,
+	prefs *config.Preferences,
+	validate *validator.Validate,
+) *WaterMeterHandler {
 	return &WaterMeterHandler{
-		svc:   svc,
-		prefs: prefs,
+		svc:      svc,
+		prefs:    prefs,
+		validate: validate,
 	}
 }
 
@@ -74,8 +80,7 @@ func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Reques
 		req.Type = "json" // default format
 	}
 
-	// Validate request DTO (enforces oneof=json csv)
-	if err := validate.Struct(req); err != nil {
+	if err := h.validate.Struct(req); err != nil {
 		return middleware.NewHttpError(http.StatusBadRequest, "validation error: "+err.Error())
 	}
 

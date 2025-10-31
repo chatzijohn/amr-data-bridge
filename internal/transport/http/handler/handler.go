@@ -4,16 +4,21 @@ import (
 	"amr-data-bridge/config"
 	"amr-data-bridge/internal/service"
 	"net/http"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type Handlers struct {
-	WaterMeter *WaterMeterHandler
+	WaterMeter  *WaterMeterHandler
+	WaterSupply *WaterSupplyHandler
 }
 
-// New initializes the main handler struct
 func New(svc *service.Services, prefs *config.Preferences) *Handlers {
+	v := validator.New()
+
 	return &Handlers{
-		WaterMeter: NewWaterMeterHandler(svc.WaterMeter, prefs),
+		WaterMeter:  NewWaterMeterHandler(svc.WaterMeter, prefs, v),
+		WaterSupply: NewWaterSupplyHandler(svc.WaterSupply, prefs, v),
 	}
 }
 

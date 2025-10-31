@@ -30,6 +30,7 @@ func New(queries *db.Queries, prefs *config.Preferences, metricsHandler http.Han
 
 	// Register versioned routes (v1)
 	v1.RegisterWatermeterRoutes(mux, h)
+	v1.RegisterWaterSupplyRoutes(mux, h)
 
 	return mux
 }

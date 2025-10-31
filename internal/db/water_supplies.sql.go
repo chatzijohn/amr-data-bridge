@@ -12,7 +12,9 @@ import (
 )
 
 const getWaterSupplyByNumber = `-- name: GetWaterSupplyByNumber :one
-SELECT id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt" FROM "waterSupplies" WHERE "supplyNumber" = $1 LIMIT 1
+SELECT id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt" FROM public."waterSupplies"
+WHERE "supplyNumber" = $1
+LIMIT 1
 `
 
 func (q *Queries) GetWaterSupplyByNumber(ctx context.Context, supplynumber string) (WaterSupply, error) {
@@ -32,23 +34,31 @@ func (q *Queries) GetWaterSupplyByNumber(ctx context.Context, supplynumber strin
 }
 
 const insertWaterSupply = `-- name: InsertWaterSupply :one
-INSERT INTO "waterSupplies" ("supplyNumber", geometry, "waterMeterSerialNumber", "createdAt", "updatedAt")
-VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4, NOW(), NOW())
+INSERT INTO public."waterSupplies" (
+    "supplyNumber",
+    geometry,
+    "waterMeterSerialNumber"
+)
+VALUES (
+    $1,
+    ST_SetSRID(ST_MakePoint($2, $3), 4326),
+    $4
+)
 RETURNING id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt"
 `
 
 type InsertWaterSupplyParams struct {
 	SupplyNumber           string
-	StMakepoint            interface{}
-	StMakepoint_2          interface{}
+	Longitude              interface{}
+	Latitude               interface{}
 	WaterMeterSerialNumber pgtype.Text
 }
 
 func (q *Queries) InsertWaterSupply(ctx context.Context, arg InsertWaterSupplyParams) (WaterSupply, error) {
 	row := q.db.QueryRow(ctx, insertWaterSupply,
 		arg.SupplyNumber,
-		arg.StMakepoint,
-		arg.StMakepoint_2,
+		arg.Longitude,
+		arg.Latitude,
 		arg.WaterMeterSerialNumber,
 	)
 	var i WaterSupply
@@ -65,39 +75,27 @@ func (q *Queries) InsertWaterSupply(ctx context.Context, arg InsertWaterSupplyPa
 	return i, err
 }
 
-const updateWaterSupply = `-- name: UpdateWaterSupply :one
-UPDATE "waterSupplies"
-SET geometry = ST_SetSRID(ST_MakePoint($2, $3), 4326),
-    "waterMeterSerialNumber" = $4,
-    "updatedAt" = NOW()
-WHERE "supplyNumber" = $1
-RETURNING id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt"
+const updateWaterSupply = `-- name: UpdateWaterSupply :exec
+UPDATE public."waterSupplies"
+SET
+    geometry = ST_SetSRID(ST_MakePoint($1, $2), 4326),
+    "waterMeterSerialNumber" = $3
+WHERE "supplyNumber" = $4
 `
 
 type UpdateWaterSupplyParams struct {
-	SupplyNumber           string
-	StMakepoint            interface{}
-	StMakepoint_2          interface{}
+	Longitude              interface{}
+	Latitude               interface{}
 	WaterMeterSerialNumber pgtype.Text
+	SupplyNumber           string
 }
 
-func (q *Queries) UpdateWaterSupply(ctx context.Context, arg UpdateWaterSupplyParams) (WaterSupply, error) {
-	row := q.db.QueryRow(ctx, updateWaterSupply,
-		arg.SupplyNumber,
-		arg.StMakepoint,
-		arg.StMakepoint_2,
+func (q *Queries) UpdateWaterSupply(ctx context.Context, arg UpdateWaterSupplyParams) error {
+	_, err := q.db.Exec(ctx, updateWaterSupply,
+		arg.Longitude,
+		arg.Latitude,
 		arg.WaterMeterSerialNumber,
+		arg.SupplyNumber,
 	)
-	var i WaterSupply
-	err := row.Scan(
-		&i.ID,
-		&i.SupplyNumber,
-		&i.Geometry,
-		&i.WaterMeterSerialNumber,
-		&i.CurrentImage,
-		&i.PreviousImage,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+	return err
 }
