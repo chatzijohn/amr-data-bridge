@@ -46,3 +46,4 @@ devenv.local.nix
 *.tar.gz
 
 build/
+secrets.yaml
