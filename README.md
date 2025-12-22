@@ -22,40 +22,40 @@ This project follows a classic layered architecture. A request flows from the HT
 +--------------------------------+
 |      HTTP Request/Response     |
 +--------------------------------+
-               |
-               v
-+--------------------------------+
-|    Transport (internal/transport/http) |
-|   - Server startup             |
-|   - Routing (router)           |
-|   - Request/Response (handler) |
-+--------------------------------+
-               |
-               v
-+--------------------------------+
+                |
+                v
++---------------------------------------+
+|    Transport (internal/transport/http)|
+|   - Server startup                    |
+|   - Routing (router)                  |
+|   - Request/Response (handler)        |
++---------------------------------------+
+                |
+                v
++--------------------------------------+
 |      Service (internal/service)      |
-|   - Core business logic        |
-|   - Orchestrates operations    |
-|   - Database-agnostic          |
-+--------------------------------+
-               |
-               v
-+--------------------------------+
+|   - Core business logic              |
+|   - Orchestrates operations          |
+|   - Database-agnostic                |
++--------------------------------------+
+                |
+                v
++--------------------------------------+
 |    Repository (internal/repository)  |
-|   - Database communication     |
-|   - Transaction management     |
-|   - Implements Querier         |
-+--------------------------------+
-               |
-               v
-+--------------------------------+
-|       Database (internal/db)       |
-|   - DB connection (db.go)      |
-|   - Querier interface          |
-|   - sqlc-generated code        |
-+--------------------------------+
+|   - Database communication           |
+|   - Transaction management           |
+|   - Implements Querier               |
++--------------------------------------+
+                |
+                v
++--------------------------------------+
+|       Database (internal/db)         |
+|   - DB connection (db.go)            |
+|   - Querier interface                |
+|   - sqlc-generated code              |
++--------------------------------------+
 |       SQL (db/query, db/schema)      |
-+--------------------------------+
++--------------------------------------+
 
 ```
 
