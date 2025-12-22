@@ -8,25 +8,33 @@ package db
 import (
 	"context"
 
+	go_postgis "github.com/cridenour/go-postgis"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getWaterSupplyByNumber = `-- name: GetWaterSupplyByNumber :one
-SELECT id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt" FROM public."waterSupplies"
+SELECT id, "supplyNumber", geometry, "waterMeterDevEUI", "createdAt", "updatedAt" FROM public."waterSupplies"
 WHERE "supplyNumber" = $1
 LIMIT 1
 `
 
-func (q *Queries) GetWaterSupplyByNumber(ctx context.Context, supplynumber string) (WaterSupply, error) {
-	row := q.db.QueryRow(ctx, getWaterSupplyByNumber, supplynumber)
-	var i WaterSupply
+type GetWaterSupplyByNumberRow struct {
+	ID               int32
+	SupplyNumber     string
+	Geometry         go_postgis.Point
+	WaterMeterDevEUI pgtype.Text
+	CreatedAt        pgtype.Timestamp
+	UpdatedAt        pgtype.Timestamp
+}
+
+func (q *Queries) GetWaterSupplyByNumber(ctx context.Context, supplyNumber string) (GetWaterSupplyByNumberRow, error) {
+	row := q.db.QueryRow(ctx, getWaterSupplyByNumber, supplyNumber)
+	var i GetWaterSupplyByNumberRow
 	err := row.Scan(
 		&i.ID,
 		&i.SupplyNumber,
 		&i.Geometry,
-		&i.WaterMeterSerialNumber,
-		&i.CurrentImage,
-		&i.PreviousImage,
+		&i.WaterMeterDevEUI,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -37,38 +45,45 @@ const insertWaterSupply = `-- name: InsertWaterSupply :one
 INSERT INTO public."waterSupplies" (
     "supplyNumber",
     geometry,
-    "waterMeterSerialNumber"
+    "waterMeterDevEUI"
 )
 VALUES (
     $1,
     ST_SetSRID(ST_MakePoint($2, $3), 4326),
     $4
 )
-RETURNING id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt"
+RETURNING id, "supplyNumber", geometry, "waterMeterDevEUI", "createdAt", "updatedAt"
 `
 
 type InsertWaterSupplyParams struct {
-	SupplyNumber           string
-	Longitude              interface{}
-	Latitude               interface{}
-	WaterMeterSerialNumber pgtype.Text
+	SupplyNumber     string
+	Longitude        interface{}
+	Latitude         interface{}
+	WaterMeterDevEui pgtype.Text
 }
 
-func (q *Queries) InsertWaterSupply(ctx context.Context, arg InsertWaterSupplyParams) (WaterSupply, error) {
+type InsertWaterSupplyRow struct {
+	ID               int32
+	SupplyNumber     string
+	Geometry         go_postgis.Point
+	WaterMeterDevEUI pgtype.Text
+	CreatedAt        pgtype.Timestamp
+	UpdatedAt        pgtype.Timestamp
+}
+
+func (q *Queries) InsertWaterSupply(ctx context.Context, arg InsertWaterSupplyParams) (InsertWaterSupplyRow, error) {
 	row := q.db.QueryRow(ctx, insertWaterSupply,
 		arg.SupplyNumber,
 		arg.Longitude,
 		arg.Latitude,
-		arg.WaterMeterSerialNumber,
+		arg.WaterMeterDevEui,
 	)
-	var i WaterSupply
+	var i InsertWaterSupplyRow
 	err := row.Scan(
 		&i.ID,
 		&i.SupplyNumber,
 		&i.Geometry,
-		&i.WaterMeterSerialNumber,
-		&i.CurrentImage,
-		&i.PreviousImage,
+		&i.WaterMeterDevEUI,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -79,22 +94,22 @@ const updateWaterSupply = `-- name: UpdateWaterSupply :exec
 UPDATE public."waterSupplies"
 SET
     geometry = ST_SetSRID(ST_MakePoint($1, $2), 4326),
-    "waterMeterSerialNumber" = $3
+    "waterMeterDevEUI" = $3
 WHERE "supplyNumber" = $4
 `
 
 type UpdateWaterSupplyParams struct {
-	Longitude              interface{}
-	Latitude               interface{}
-	WaterMeterSerialNumber pgtype.Text
-	SupplyNumber           string
+	Longitude        interface{}
+	Latitude         interface{}
+	WaterMeterDevEui pgtype.Text
+	SupplyNumber     string
 }
 
 func (q *Queries) UpdateWaterSupply(ctx context.Context, arg UpdateWaterSupplyParams) error {
 	_, err := q.db.Exec(ctx, updateWaterSupply,
 		arg.Longitude,
 		arg.Latitude,
-		arg.WaterMeterSerialNumber,
+		arg.WaterMeterDevEui,
 		arg.SupplyNumber,
 	)
 	return err
