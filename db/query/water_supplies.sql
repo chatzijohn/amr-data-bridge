@@ -1,24 +1,24 @@
 -- name: GetWaterSupplyByNumber :one
-SELECT id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt" FROM public."waterSupplies"
-WHERE "supplyNumber" = $1
+SELECT id, "supplyNumber", geometry, "waterMeterDevEUI", "createdAt", "updatedAt" FROM public."waterSupplies"
+WHERE "supplyNumber" = @supply_number
 LIMIT 1;
 
 -- name: InsertWaterSupply :one
 INSERT INTO public."waterSupplies" (
     "supplyNumber",
     geometry,
-    "waterMeterSerialNumber"
+    "waterMeterDevEUI"
 )
 VALUES (
     @supply_number,
     ST_SetSRID(ST_MakePoint(@longitude, @latitude), 4326),
-    @water_meter_serial_number
+    @water_meter_dev_eui
 )
-RETURNING id, "supplyNumber", geometry, "waterMeterSerialNumber", "currentImage", "previousImage", "createdAt", "updatedAt";
+RETURNING id, "supplyNumber", geometry, "waterMeterDevEUI", "createdAt", "updatedAt";
 
 -- name: UpdateWaterSupply :exec
 UPDATE public."waterSupplies"
 SET
     geometry = ST_SetSRID(ST_MakePoint(@longitude, @latitude), 4326),
-    "waterMeterSerialNumber" = @water_meter_serial_number
+    "waterMeterDevEUI" = @water_meter_dev_eui
 WHERE "supplyNumber" = @supply_number;

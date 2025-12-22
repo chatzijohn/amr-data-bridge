@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterWaterSupplyRoutes(mux *http.ServeMux, h *handler.Handlers) {
-	mux.HandleFunc("/api/v1/watersupplies", middleware.HandleErrors(
+	mux.HandleFunc("/api/v1/watersupplies/import", middleware.HandleErrors(
 		middleware.OnlyAllow(http.MethodPost, h.WaterSupply.ImportWaterSupplies),
 	))
 }

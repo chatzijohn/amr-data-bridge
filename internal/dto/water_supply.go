@@ -6,7 +6,7 @@ type WaterSupplyRequest struct {
 	Latitude     float64 `json:"latitude" binding:"required"`
 	Longitude    float64 `json:"longitude" binding:"required"`
 	SerialNumber string  `json:"serialNumber,omitempty"`
-	Active       bool    `json:"Active,omitempty"`
+	Active       bool    `json:"active,omitempty"`
 }
 
 // Response DTO — what we send back to the client
