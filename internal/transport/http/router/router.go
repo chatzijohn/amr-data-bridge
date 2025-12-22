@@ -2,20 +2,21 @@ package router
 
 import (
 	"amr-data-bridge/config"
-	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/service"
 	"amr-data-bridge/internal/transport/http/handler"
 	v1 "amr-data-bridge/internal/transport/http/router/v1"
 	"net/http"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // New creates and configures the main HTTP router.
 // It now accepts preferences so that handlers and services can respect user settings.
-func New(queries *db.Queries, prefs *config.Preferences, metricsHandler http.Handler) http.Handler {
+func New(pool *pgxpool.Pool, prefs *config.Preferences, metricsHandler http.Handler) http.Handler {
 	mux := http.NewServeMux()
 
 	// Initialize service layer with preferences
-	svcs := service.New(queries, prefs)
+	svcs := service.New(pool, prefs)
 
 	// Initialize handlers with preferences
 	h := handler.New(svcs, prefs)

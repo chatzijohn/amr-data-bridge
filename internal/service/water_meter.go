@@ -5,32 +5,29 @@ import (
 	"amr-data-bridge/internal/db"
 	"amr-data-bridge/internal/dto"
 	"amr-data-bridge/internal/mapper"
+	"amr-data-bridge/internal/repository"
 	"context"
-	"log"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type WaterMeterStore interface {
-	GetWaterMeters(ctx context.Context, arg db.GetWaterMetersParams) ([]db.GetWaterMetersRow, error)
+type WaterMeterService interface {
+	GetWaterMeters(ctx context.Context, req dto.WaterMetersRequest) ([]dto.WaterMeterResponse, error)
 }
 
-// WaterMeterService provides business logic for water meters.
-type WaterMeterService struct {
-	store WaterMeterStore
+type waterMeterService struct {
+	repo  repository.WaterMeterRepository
 	prefs *config.Preferences
 }
 
-// NewWaterMeterService creates a new WaterMeterService.
-func NewWaterMeterService(store WaterMeterStore, prefs *config.Preferences) *WaterMeterService {
-	return &WaterMeterService{
-		store: store,
+func NewWaterMeterService(repo repository.WaterMeterRepository, prefs *config.Preferences) WaterMeterService {
+	return &waterMeterService{
+		repo:  repo,
 		prefs: prefs,
 	}
 }
 
-func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.WaterMetersRequest) ([]dto.WaterMeterResponse, error) {
-
+func (s *waterMeterService) GetWaterMeters(ctx context.Context, req dto.WaterMetersRequest) ([]dto.WaterMeterResponse, error) {
 	const defaultLimit = 10000
 
 	limit := req.Limit
@@ -45,7 +42,9 @@ func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.WaterMet
 			Valid: true,
 		}
 	} else {
-		active = pgtype.Bool{Valid: false}
+		active = pgtype.Bool{
+			Valid: false,
+		}
 	}
 
 	params := db.GetWaterMetersParams{
@@ -53,16 +52,12 @@ func (s *WaterMeterService) GetWaterMeters(ctx context.Context, req dto.WaterMet
 		Active: active,
 	}
 
-	// Call repository
-	meters, err := s.store.GetWaterMeters(ctx, params)
+	meters, err := s.repo.GetWaterMeters(ctx, params)
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
 
-	// Map DB results to DTOs with preferences applied
 	response := mapper.WaterMetersToDTO(meters, s.prefs)
 
 	return response, nil
-
 }

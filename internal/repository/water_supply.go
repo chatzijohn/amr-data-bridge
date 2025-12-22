@@ -2,53 +2,92 @@ package repository
 
 import (
 	"amr-data-bridge/internal/db"
+	"amr-data-bridge/internal/dto"
 	"context"
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// WaterSupplyRepository provides access to water supply data.
-type WaterSupplyRepository struct {
-	q *db.Queries
+type WaterSupplyRepository interface {
+	ImportWaterSupplies(ctx context.Context, req []dto.WaterSupplyRequest) ([]dto.WaterSupplyResponse, error)
 }
 
-// NewWaterSupplyRepository creates a new WaterSupplyRepository.
-func NewWaterSupplyRepository(q *db.Queries) *WaterSupplyRepository {
-	return &WaterSupplyRepository{q: q}
+type waterSupplyRepository struct {
+	q    db.Querier
+	pool *pgxpool.Pool
 }
 
-// BeginTx starts a new transaction and returns a *db.Queries bound to it.
-func (r *WaterSupplyRepository) BeginTx(ctx context.Context) (*db.Queries, pgx.Tx, error) {
-	tx, err := r.q.BeginTx(ctx)
-	if err != nil {
-		return nil, nil, fmt.Errorf("begin tx: %w", err)
+func (r *waterSupplyRepository) ImportWaterSupplies(ctx context.Context, req []dto.WaterSupplyRequest) ([]dto.WaterSupplyResponse, error) {
+	var responses []dto.WaterSupplyResponse
+
+	txErr := execTx(ctx, r.pool, func(q *db.Queries) error {
+		for _, row := range req {
+			// Check if water supply already exists
+			existing, err := q.GetWaterSupplyByNumber(ctx, row.SupplyNumber)
+			if err != nil {
+				if err == pgx.ErrNoRows {
+					// Insert new
+					insertArg := db.InsertWaterSupplyParams{
+						SupplyNumber:           row.SupplyNumber,
+						Longitude:              row.Longitude,
+						Latitude:               row.Latitude,
+						WaterMeterSerialNumber: pgtype.Text{String: row.SerialNumber, Valid: row.SerialNumber != ""},
+					}
+					ws, err := q.InsertWaterSupply(ctx, insertArg)
+					if err != nil {
+						return fmt.Errorf("insert supply %s: %w", row.SupplyNumber, err)
+					}
+					responses = append(responses, dto.WaterSupplyResponse{
+						ID:           int64(ws.ID),
+						SupplyNumber: ws.SupplyNumber,
+						Latitude:     row.Latitude,  // From request, as geometry isn't returned directly
+						Longitude:    row.Longitude, // From request
+						SerialNumber: ws.WaterMeterSerialNumber.String,
+						CreatedAt:    ws.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+						UpdatedAt:    ws.UpdatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+					})
+					continue
+				}
+				return fmt.Errorf("get supply %s: %w", row.SupplyNumber, err)
+			}
+
+			// Update existing record
+			updateArg := db.UpdateWaterSupplyParams{
+				Longitude:              row.Longitude,
+				Latitude:               row.Latitude,
+				WaterMeterSerialNumber: pgtype.Text{String: row.SerialNumber, Valid: row.SerialNumber != ""},
+				SupplyNumber:           existing.SupplyNumber,
+			}
+			err = q.UpdateWaterSupply(ctx, updateArg)
+			if err != nil {
+				return fmt.Errorf("update supply %s: %w", row.SupplyNumber, err)
+			}
+
+			// We need to fetch the updated record to get the new UpdatedAt timestamp
+			updated, err := q.GetWaterSupplyByNumber(ctx, row.SupplyNumber)
+			if err != nil {
+				return fmt.Errorf("get updated supply %s: %w", row.SupplyNumber, err)
+			}
+
+			responses = append(responses, dto.WaterSupplyResponse{
+				ID:           int64(updated.ID),
+				SupplyNumber: updated.SupplyNumber,
+				Latitude:     row.Latitude,
+				Longitude:    row.Longitude,
+				SerialNumber: updated.WaterMeterSerialNumber.String,
+				CreatedAt:    updated.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+				UpdatedAt:    updated.UpdatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+			})
+		}
+		return nil
+	})
+
+	if txErr != nil {
+		return nil, txErr
 	}
-	return r.q.WithTx(tx), tx, nil
-}
 
-// GetWaterSupplyByNumber retrieves a supply by its number.
-func (r *WaterSupplyRepository) GetWaterSupplyByNumber(ctx context.Context, q *db.Queries, supplyNumber string) (db.WaterSupply, error) {
-	ws, err := q.GetWaterSupplyByNumber(ctx, supplyNumber)
-	if err != nil {
-		return db.WaterSupply{}, fmt.Errorf("get water supply by number: %w", err)
-	}
-	return ws, nil
-}
-
-// InsertWaterSupply inserts a new water supply record.
-func (r *WaterSupplyRepository) InsertWaterSupply(ctx context.Context, q *db.Queries, arg db.InsertWaterSupplyParams) (db.WaterSupply, error) {
-	ws, err := q.InsertWaterSupply(ctx, arg)
-	if err != nil {
-		return db.WaterSupply{}, fmt.Errorf("insert water supply: %w", err)
-	}
-	return ws, nil
-}
-
-// UpdateWaterSupply updates an existing water supply record.
-func (r *WaterSupplyRepository) UpdateWaterSupply(ctx context.Context, q *db.Queries, arg db.UpdateWaterSupplyParams) error {
-	if err := q.UpdateWaterSupply(ctx, arg); err != nil {
-		return fmt.Errorf("update water supply: %w", err)
-	}
-	return nil
+	return responses, nil
 }

@@ -16,6 +16,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -25,6 +27,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	var pool *pgxpool.Pool
 	pool, err := db.NewPGPool(ctx, &cfg.DB)
 	if err != nil {
 		log.Fatalf("Unable to connect to DB: %v", err)
@@ -43,11 +46,8 @@ func main() {
 		log.Fatalf("Failed to load preferences: %v", err)
 	}
 
-	// sqlc Queries instance
-	queries := db.New(pool)
-
 	// Start HTTP server
-	if err := httpServer.Start(ctx, &cfg.SERVER, queries, prefs, metricsHandler); err != nil {
+	if err := httpServer.Start(ctx, &cfg.SERVER, pool, prefs, metricsHandler); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }

@@ -13,20 +13,17 @@ import (
 
 // WaterSupplyHandler handles HTTP routes for water supplies.
 type WaterSupplyHandler struct {
-	svc *service.WaterSupplyService
-	// prefs    *config.Preferences
+	svc      service.WaterSupplyService
 	validate *validator.Validate
 }
 
 // NewWaterSupplyHandler creates a new WaterSupplyHandler.
 func NewWaterSupplyHandler(
-	svc *service.WaterSupplyService,
-	// prefs *config.Preferences,
+	svc service.WaterSupplyService,
 	v *validator.Validate,
 ) *WaterSupplyHandler {
 	return &WaterSupplyHandler{
-		svc: svc,
-		// prefs:    prefs,
+		svc:      svc,
 		validate: v,
 	}
 }
@@ -57,7 +54,6 @@ func (h *WaterSupplyHandler) ImportWaterSupplies(w http.ResponseWriter, r *http.
 		}
 	}
 
-	// 💡 Let the service handle transaction management internally
 	result, err := h.svc.ImportWaterSupplies(ctx, payload)
 	if err != nil {
 		return middleware.NewHttpError(http.StatusInternalServerError, err.Error())
