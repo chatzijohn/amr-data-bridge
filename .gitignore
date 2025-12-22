@@ -47,3 +47,5 @@ devenv.local.nix
 
 build/
 secrets.yaml
+.swp
+*.swp
