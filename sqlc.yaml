@@ -8,3 +8,8 @@ sql:
         out: "internal/db"
         package: "db"
         sql_package: "pgx/v5"
+        overrides:
+          - db_type: "public.geometry"
+            go_type:
+              import: "github.com/cridenour/go-postgis"
+              type: "Point"

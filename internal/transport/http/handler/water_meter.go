@@ -18,14 +18,14 @@ import (
 
 // WaterMeterHandler handles HTTP routes for water meters.
 type WaterMeterHandler struct {
-	svc      *service.WaterMeterService
+	svc      service.WaterMeterService
 	prefs    *config.Preferences
 	validate *validator.Validate
 }
 
 // NewWaterMeterHandler creates a new WaterMeterHandler with dependencies.
 func NewWaterMeterHandler(
-	svc *service.WaterMeterService,
+	svc service.WaterMeterService,
 	prefs *config.Preferences,
 	validate *validator.Validate,
 ) *WaterMeterHandler {
@@ -62,16 +62,11 @@ func (h *WaterMeterHandler) GetWaterMeters(w http.ResponseWriter, r *http.Reques
 
 	// Parse active
 	if activeStr := q.Get("active"); activeStr != "" {
-		switch strings.ToLower(activeStr) {
-		case "true":
-			val := true
-			req.Active = &val
-		case "false":
-			val := false
-			req.Active = &val
-		default:
-			return middleware.NewHttpError(http.StatusBadRequest, "'active' must be true, false, or omitted")
+		active, err := strconv.ParseBool(activeStr)
+		if err != nil {
+			return middleware.NewHttpError(http.StatusBadRequest, "'active' must be a boolean")
 		}
+		req.Active = &active
 	}
 
 	// Parse and normalize type

@@ -13,12 +13,12 @@ type Handlers struct {
 	WaterSupply *WaterSupplyHandler
 }
 
-func New(svc *service.Services, prefs *config.Preferences) *Handlers {
+func New(svc service.Service, prefs *config.Preferences) *Handlers {
 	v := validator.New()
 
 	return &Handlers{
-		WaterMeter:  NewWaterMeterHandler(svc.WaterMeter, prefs, v),
-		WaterSupply: NewWaterSupplyHandler(svc.WaterSupply, prefs, v),
+		WaterMeter:  NewWaterMeterHandler(svc.WaterMeter(), prefs, v),
+		WaterSupply: NewWaterSupplyHandler(svc.WaterSupply(), v),
 	}
 }
 
