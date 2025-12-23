@@ -1,41 +1,27 @@
-# -------------------------
-# Stage 1: Build the Go binary
-# -------------------------
-FROM golang:1.25.1-alpine AS builder
+# Build Stage
+FROM golang:alpine AS builder
 
-# Install git and build dependencies
-RUN apk add --no-cache git
-
-# Set working directory
 WORKDIR /app
 
-# Copy dependency files first for caching
+# Copy dependency files first to leverage Docker cache
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
+# Copy the rest of the source code
 COPY . .
 
-# Build the Go binary from cmd/server/main.go
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o amr-data-bridge ./cmd/server
+# Build the binary (CGO_ENABLED=0 for static linking)
+RUN CGO_ENABLED=0 GOOS=linux go build -o amr-bridge ./cmd/server
 
-# -------------------------
-# Stage 2: Minimal runtime image
-# -------------------------
-FROM gcr.io/distroless/base-debian12
+# Final Stage - minimal image
+FROM alpine:latest
 
-# Create working directory
 WORKDIR /app
 
-# Copy the compiled binary from builder stage
-COPY --from=builder /app/amr-data-bridge .
+# Copy binary and default preferences
+COPY --from=builder /app/amr-bridge .
+COPY preferences.yaml .
 
+EXPOSE 8080
 
-
-# Expose the application port
-EXPOSE 7050
-
-# Run the compiled binary
-ENTRYPOINT ["/app/amr-data-bridge"]
-
-
+CMD ["./amr-bridge"]

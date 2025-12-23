@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -34,8 +35,25 @@ type ExportPreferences struct {
 	WaterMeterFields []string `yaml:"water_meter_fields"`
 }
 
+// TokenPolicy defines the rules for a specific API token, like IP whitelisting.
+type TokenPolicy struct {
+	Enabled bool     `yaml:"enabled"`
+	IPs     []string `yaml:"ips"`
+}
+
+// AuthConfig holds the authentication configuration loaded from preferences.yaml.
+// It defines the header to check and the policies for named tokens.
+type AuthConfig struct {
+	Header string                 `yaml:"header"`
+	Tokens map[string]TokenPolicy `yaml:"tokens"`
+}
+
+// AuthTokens is a map of token names to their secret values.
+type AuthTokens map[string]string
+
 type Preferences struct {
 	Export ExportPreferences `yaml:"export"`
+	Auth   AuthConfig        `yaml:"auth"`
 }
 
 func Load() *AppConfig {
@@ -90,4 +108,25 @@ func LoadPreferences(path string) (*Preferences, error) {
 	}
 
 	return &prefs, nil
+}
+
+// LoadTokens parses a comma-separated string of key:value pairs from the TOKEN_LIST env var.
+// e.g., "TOKEN_LIST=name1:value1,name2:value2"
+func LoadTokens() (AuthTokens, error) {
+	const envVar = "TOKEN_LIST"
+	tokens := make(AuthTokens)
+	tokenList := os.Getenv(envVar)
+	if tokenList == "" {
+		return tokens, nil // No tokens defined, return empty map
+	}
+
+	pairs := strings.Split(tokenList, ",")
+	for _, pair := range pairs {
+		parts := strings.SplitN(strings.TrimSpace(pair), ":", 2)
+		if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+			return nil, fmt.Errorf("invalid token format in %s: %s", envVar, pair)
+		}
+		tokens[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
+	}
+	return tokens, nil
 }

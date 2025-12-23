@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"amr-data-bridge/config"
@@ -11,12 +11,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func New(ctx context.Context, cfg *config.ServerConfig, pool *pgxpool.Pool, prefs *config.Preferences, metricsHandler http.Handler) *http.Server {
+func New(ctx context.Context, cfg *config.ServerConfig, pool *pgxpool.Pool, prefs *config.Preferences, tokens config.AuthTokens, metricsHandler http.Handler) *http.Server {
 	addr := fmt.Sprintf("%s:%s", cfg.HOST, cfg.PORT)
 
 	return &http.Server{
 		Addr:         addr,
-		Handler:      router.New(pool, prefs, metricsHandler),
+		Handler:      router.New(pool, prefs, tokens, metricsHandler),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,

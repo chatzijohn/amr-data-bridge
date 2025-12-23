@@ -7,7 +7,7 @@ export:
     - CurrentReading
     - LastSeen
 auth:
-  header: "X-API-Key"
+  header: "Authorization"
   tokens:
     export_readonly:
       enabled: true

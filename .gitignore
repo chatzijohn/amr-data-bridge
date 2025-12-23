@@ -49,3 +49,4 @@ build/
 secrets.yaml
 .swp
 *.swp
+amr-data-bridge.tar

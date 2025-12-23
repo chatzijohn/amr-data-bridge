@@ -56,8 +56,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	tokens, err := config.LoadTokens()
+	if err != nil {
+		logger.Error("Failed to load tokens from env", "error", err)
+		os.Exit(1)
+	}
+	if len(tokens) > 0 {
+		logger.Info("Loaded API tokens", "count", len(tokens))
+	}
+
 	// Initialize the server (but don't block yet)
-	srv := httpServer.New(ctx, &cfg.SERVER, pool, prefs, metricsHandler)
+	srv := httpServer.New(ctx, &cfg.SERVER, pool, prefs, tokens, metricsHandler)
 
 	// Run server in a goroutine so main can listen for signals
 	go func() {
